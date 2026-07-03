@@ -16,6 +16,7 @@ Sprint.md and Context.md serve as the single source of truth for the codebase an
 * **Database ORM**: Prisma ORM v7.8.0
 * **Database Engine**: PostgreSQL (db.prisma.io)
 * **Authentication**: Clerk (`@clerk/nextjs`)
+* **Music Catalog Backend**: Deezer Public API
 * **Iconography**: `lucide-react`
 * **Formatting/Linting**: ESLint & Prettier
 
@@ -36,10 +37,24 @@ c:\Users\ayesh\Desktop\Spotify clone
 │   │   ├── api/
 │   │   │   ├── like/
 │   │   │   │   └── route.ts  # Song like/unlike toggles API
+│   │   │   ├── music/
+│   │   │   │   ├── album/
+│   │   │   │   │   └── [id]/
+│   │   │   │   │       └── route.ts # GET single album details API
+│   │   │   │   ├── artist/
+│   │   │   │   │   └── [id]/
+│   │   │   │   │       └── route.ts # GET single artist details API
+│   │   │   │   ├── featured/
+│   │   │   │   │   └── route.ts # GET charts/featured music feed API
+│   │   │   │   ├── search/
+│   │   │   │   │   └── route.ts # GET catalog search results API
+│   │   │   │   └── track/
+│   │   │   │       └── [id]/
+│   │   │   │           └── route.ts # GET single track details API
 │   │   │   ├── playlist/
 │   │   │   │   └── route.ts  # GET, POST, DELETE playlists API
 │   │   │   ├── songs/
-│   │   │   │   └── route.ts  # GET list of all songs API
+│   │   │   │   └── route.ts  # GET list of all database songs API
 │   │   │   └── user/
 │   │   │       └── sync/
 │   │   │           └── route.ts # Secure Clerk user synchronization API
@@ -63,7 +78,15 @@ c:\Users\ayesh\Desktop\Spotify clone
 │   │   └── ui/
 │   │       └── button.tsx  # Shadcn Button component configured for Tailwind v4
 │   └── lib/
+│       ├── music/          # Deezer integration services
+│       │   ├── client.ts   # Core fetch client with timeouts and retries
+│       │   ├── details.ts  # Track, album, and artist lookup handlers
+│       │   ├── featured.ts # Charts/Featured feed fetch handlers
+│       │   ├── mappers.ts  # Mappers from raw Deezer JSON to internal types
+│       │   └── search.ts   # Music, artist, and album search handlers
 │       ├── prisma.ts       # Prisma Client singleton
+│       ├── types/
+│       │   └── music.ts    # Music integration typescript definitions
 │       └── utils.ts        # Tailwind merge class utility
 ├── src/proxy.ts            # Clerk route protection proxy
 ├── components.json         # shadcn/ui config
@@ -166,3 +189,23 @@ Prisma ORM is integrated and connected to a PostgreSQL database hosted at db.pri
   - `POST /api/playlist`: Creates a new playlist under the active user's session.
   - `DELETE /api/playlist?id=xxx`: Deletes a playlist owned by the active user.
   - `POST /api/like`: Toggles (likes/unlikes) a track for the authenticated user session.
+
+---
+
+## Sprint 5 Music API Integration
+
+The application integrates with the external Deezer REST API to fetch live music catalog data. All music data is proxied through our secure Next.js backend API routes (preventing direct client-side external requests).
+
+* **Core Client (`src/lib/music/client.ts`)**:
+  - Handles AbortController timeouts (8s limits) and exponential backoff retry logic (up to 3 attempts) for server resilience.
+  - Configures Next.js fetch caching revalidations (`next: { revalidate: 3600 }`).
+* **Lookup Helpers**:
+  - `featured.ts`: Fetches top tracks, albums, and artists.
+  - `search.ts`: Searches tracks, albums, and artists matching a user query concurrently.
+  - `details.ts`: Resolves single items (tracks, albums, and artists) by ID.
+* **REST API Route Proxies**:
+  - `GET /api/music/featured`: Fetches homepage charts.
+  - `GET /api/music/search?q=xxx&type=xxx`: Searches the catalog.
+  - `GET /api/music/track/[id]`: Fetches a single track details by ID.
+  - `GET /api/music/album/[id]`: Fetches a single album details (with nested track list) by ID.
+  - `GET /api/music/artist/[id]`: Fetches a single artist details by ID.

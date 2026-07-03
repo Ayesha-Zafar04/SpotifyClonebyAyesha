@@ -89,7 +89,7 @@ Set up PostgreSQL and Prisma to store user-specific data while keeping music con
 
 ## Sprint 5 – Music API Integration
 
-**Status**: Pending
+**Status**: Completed
 
 ### Goal
 
@@ -97,15 +97,17 @@ Integrate an external music API to provide songs, albums, artists, and search re
 
 ### Tasks
 
-* [ ] Select a music API.
-* [ ] Configure API authentication.
-* [ ] Create reusable API helper functions.
-* [ ] Fetch featured songs.
-* [ ] Fetch albums.
-* [ ] Fetch artists.
-* [ ] Fetch song details by ID.
-* [ ] Implement error handling and loading states.
-* [ ] Cache API responses where appropriate.
+* [x] Select a music API (Deezer API selected for direct MP3 audio preview capabilities).
+* [x] Configure API authentication.
+* [x] Create reusable API helper functions.
+* [x] Fetch featured songs.
+* [x] Fetch albums.
+* [x] Fetch artists.
+* [x] Fetch song details by ID.
+* [x] Implement request timeout (8s limit) and exponential backoff retry logic.
+* [x] Create dedicated, secure REST API proxy routes in Next.js.
+* [x] Implement error handling and loading states.
+* [x] Cache API responses where appropriate.
 
 ---
 
